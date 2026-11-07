@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>C++ для матуры: шпаргалка</title>
+<style>
+:root{--bg:#f3f5f2;--card:#fff;--ink:#17201b;--mute:#58655d;--line:#cfd8d1;--acc:#0b6b4f;--accbg:#dff1e9;--code:#10211a;--codeink:#d8f3e6;--bad:#a4261b;--ok:#0b6b4f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101613;--card:#18211c;--ink:#e6efe9;--mute:#9db0a5;--line:#2c3a32;--acc:#5fd2a6;--accbg:#1d3a2d;--code:#0b100d;--codeink:#cdeedd;--bad:#ff8a7d;--ok:#5fd2a6}}
+:root[data-theme="dark"]{--bg:#101613;--card:#18211c;--ink:#e6efe9;--mute:#9db0a5;--line:#2c3a32;--acc:#5fd2a6;--accbg:#1d3a2d;--code:#0b100d;--codeink:#cdeedd;--bad:#ff8a7d;--ok:#5fd2a6}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 1.7rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 16px}
+#q{width:100%;padding:12px 14px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--ink)}
+#q:focus,button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 6px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:999px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--acc);border-color:var(--acc);color:var(--bg);font-weight:600}
+.count{color:var(--mute);font-size:.9rem;margin:6px 0 12px}
+article{background:var(--card);border:1px solid var(--line);border-radius:6px;margin:0 0 12px;padding:14px 16px}
+article h2{font-size:1.05rem;margin:0 0 2px}
+.cat{color:var(--mute);font-size:.85rem;margin:0 0 8px}
+pre{margin:6px 0;padding:10px 12px;background:var(--code);color:var(--codeink);border-radius:4px;overflow-x:auto;font:.88rem/1.45 Consolas,"Courier New",monospace}
+.lbl{font-weight:600;font-size:.9rem;margin-top:8px}
+.guess{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.guess input{flex:1 1 180px;padding:8px 10px;font:.95rem Consolas,"Courier New",monospace;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink)}
+button.act{padding:8px 14px;border:1px solid var(--acc);background:var(--accbg);color:var(--ink);border-radius:4px;font:inherit;font-size:.9rem;cursor:pointer}
+.res{margin:6px 0 0;font-size:.95rem}
+.res.ok{color:var(--ok)}.res.no{color:var(--bad)}
+.note{color:var(--mute);font-size:.9rem;margin:6px 0 0}
+.empty{padding:24px;text-align:center;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>C++ для матуры: шпаргалка</h1>
+<p class="sub">Visual Studio, rozszerzona, CKE 2027. Сначала угадай результат, потом проверяй.</p>
+<input id="q" type="search" placeholder="Поиск: sort, ifstream, substr…" aria-label="Поиск">
+<div class="chips" id="chips"></div>
+<div class="count" id="count"></div>
+<div id="list"></div>
+</main>
+<script>
+const C={io:"Wejście/wyjście (ввод/вывод)",file:"Pliki (файлы)",str:"string (строки)",vec:"vector (вектор)",alg:"algorithm / numeric",math:"cmath и числа"};
+// [категория, название, синтаксис, пример, вопрос, ответ, заметка]
+const D=[
+["io","cin и cout","#include <iostream>\ncin >> a >> b;\ncout << x << \"\\n\";",
+"int a, b;\ncin >> a >> b;\ncout << a + b << \"\\n\";","Ввод: 3 4. Что выведет?","7","\"\\n\" быстрее, чем endl: endl ещё и сбрасывает буфер. Не забудь using namespace std; или пиши std::."],
+["io","cin >> string читает одно слово","string s;\ncin >> s;",
+"string s;\ncin >> s;\ncout << s;","Ввод: ala ma kota. Что выведет?","ala","cin >> останавливается на пробеле. Для целой строки нужен getline."],
+["io","getline: строка целиком","#include <string>\ngetline(cin, s);",
+"string s;\ngetline(cin, s);\ncout << s.size();","Ввод: ala ma. Что выведет?","6","Если перед getline был cin >> x, в буфере остаётся перевод строки: добавь cin.ignore();"],
+["io","fixed и setprecision","#include <iomanip>\ncout << fixed << setprecision(2) << x;",
+"double x = 3.14159;\ncout << fixed << setprecision(2) << x;","Что выведет?","3.14","Без fixed setprecision(2) считает все значащие цифры, а не знаки после запятой: выйдет 3.1."],
+["file","ifstream: чтение из файла","#include <fstream>\nifstream f(\"dane.txt\");\nwhile (f >> x) { ... }",
+"// dane.txt содержит: 5 8 2\nifstream f(\"dane.txt\");\nint x, s = 0;\nwhile (f >> x) s += x;\ncout << s;","Что выведет?","15","Файл должен лежать в рабочей папке проекта. Пиши while (f >> x), а не while (!f.eof()): eof даст лишний проход."],
+["file","ofstream: запись в файл","ofstream w(\"wynik.txt\");\nw << ... << endl;",
+"ofstream w(\"wynik.txt\");\nw << 1 << \" \" << 2 << endl;","Что окажется в wynik.txt?","1 2","Формат ответа в файле CKE проверяет буквально: один пробел, нужные переводы строки. Читай «Do oceny oddajesz» в задаче."],
+["file","getline из файла: строки со словами","while (getline(f, s)) { ... }",
+"// plik: abc\n//       de\nifstream f(\"dane.txt\");\nstring s;\nint n = 0;\nwhile (getline(f, s)) n++;\ncout << n;","Что выведет?","2","Для задач типа szyfrogram.txt (строки без пробелов) хватит f >> s. getline нужен, когда в строке есть пробелы."],
+["str","size() и индексы","s.size()   s[i]   s.empty()",
+"string s = \"matura\";\ncout << s.size() << s[0];","Что выведет?","6m","Индексы с 0. size() возвращает unsigned: в цикле for (int i = 0; i < s.size(); i++) компилятор предупредит, а при i < s.size() - 1 и пустой строке будет ошибка."],
+["str","substr(pos, len)","s.substr(pos, len)",
+"string s = \"informatyka\";\ncout << s.substr(2, 4);","Что выведет?","form","Второй аргумент: длина, а не конечный индекс."],
+["str","find и npos","s.find(t)   // индекс или string::npos",
+"string s = \"abcabc\";\ncout << s.find(\"ca\");","Что выведет?","2","Если не нашлось, вернётся string::npos (огромное число), а не -1. Сравнивай с npos."],
+["str","Цифра символа и число","c - '0'   stoi(s)   to_string(n)",
+"char c = '7';\ncout << c - '0' + 1 << \" \" << stoi(\"42\") + 1;","Что выведет?","8 43","'7' это код символа, не число 7. Вычитание '0' даёт цифру. Именно так считается сумма цифр napisu в zadaniu 6."],
+["str","reverse строки","#include <algorithm>\nreverse(s.begin(), s.end());",
+"string s = \"abc\";\nreverse(s.begin(), s.end());\ncout << s;","Что выведет?","cba","Для проверки palindromu (палиндром) сравни s со своей перевёрнутой копией."],
+["vec","vector: создание и push_back","#include <vector>\nvector<int> v(n, 0);\nv.push_back(x);   v.size()",
+"vector<int> v = {1, 2};\nv.push_back(3);\ncout << v.size() << v[2];","Что выведет?","33","v(n, 0) создаёт n нулей. Если сделать v(n) и потом push_back, элементы встанут после n нулей."],
+["vec","Обход vector","for (int x : v) ...\nfor (int i = 0; i < v.size(); i++) ...",
+"vector<int> v = {4, 5, 6};\nint s = 0;\nfor (int x : v) s += x;\ncout << s;","Что выведет?","15","Range-for копирует x. Чтобы менять элементы, пиши for (int& x : v)."],
+["alg","sort","#include <algorithm>\nsort(v.begin(), v.end());\nsort(v.begin(), v.end(), greater<int>());",
+"vector<int> v = {3, 1, 2};\nsort(v.begin(), v.end(), greater<int>());\nfor (int x : v) cout << x;","Что выведет?","321","Для обычного массива int t[n]: sort(t, t + n). Конец указывается за последним элементом."],
+["alg","min_element / max_element","*max_element(v.begin(), v.end())",
+"vector<int> v = {4, 9, 2};\ncout << *max_element(v.begin(), v.end());","Что выведет?","9","Функция возвращает итератор (указатель на элемент), значение берётся звёздочкой. Индекс: it - v.begin()."],
+["alg","accumulate: сумма","#include <numeric>\naccumulate(v.begin(), v.end(), 0)",
+"vector<int> v = {1, 2, 3};\ncout << accumulate(v.begin(), v.end(), 0);","Что выведет?","6","Тип результата берётся из третьего аргумента. Для больших сумм пиши 0LL, иначе int переполнится."],
+["alg","count: сколько раз","count(v.begin(), v.end(), x)",
+"vector<int> v = {2, 1, 2};\ncout << count(v.begin(), v.end(), 2);","Что выведет?","2","Для подсчёта частот букв (zadanie 7.1) проще массив int t[26]; t[c - 'A']++;"],
+["alg","swap, min, max, gcd","swap(a, b);   min(a, b);   max(a, b);\ngcd(a, b);   // C++17",
+"cout << max(3, 7) << \" \" << gcd(12, 18);","Что выведет?","7 6","gcd требует C++17: в Visual Studio включи в свойствах проекта Language Standard. Иначе пиши алгоритм Евклида сам."],
+["math","cmath: sqrt, pow, abs, floor, ceil","#include <cmath>\nsqrt(x)  pow(a, b)  abs(x)  floor(x)  ceil(x)",
+"cout << sqrt(16) << \" \" << pow(2, 10) << \" \" << ceil(2.1);","Что выведет?","4 1024 3","pow и sqrt работают с double и дают неточности на больших числах. Для целых степеней в задачах пиши цикл."],
+["math","Целочисленные / и %","a / b   a % b   // для int",
+"cout << 7 / 2 << \" \" << 7 % 2 << \" \" << 7 / 2.0;","Что выведет?","3 1 3.5","int / int отбрасывает дробь. Для нужного результата одно из чисел делай double."],
+["math","Переполнение int","int ~ 2.1 * 10^9\nlong long ~ 9.2 * 10^18",
+"long long a = 100000;\ncout << a * a;","Что выведет?","10000000000","Если бы a было int, a * a дало бы мусор. Суммы и произведения в задачах на данных из файлов храни в long long."]
+];
+let cat="all";
+const chips=document.getElementById("chips"),list=document.getElementById("list"),cnt=document.getElementById("count"),q=document.getElementById("q");
+function chip(k,t){const b=document.createElement("button");b.className="chip";b.textContent=t;b.setAttribute("aria-pressed",k===cat);b.onclick=()=>{cat=k;render()};chips.appendChild(b)}
+const norm=s=>s.trim().replace(/\s+/g,"").toLowerCase();
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function card(r){
+ const a=el("article"),id="g"+Math.random().toString(36).slice(2,8);
+ a.appendChild(el("h2","",r[1]));a.appendChild(el("p","cat",C[r[0]]));
+ a.appendChild(el("div","lbl","Синтаксис"));a.appendChild(el("pre","",r[2]));
+ a.appendChild(el("div","lbl","Пример"));a.appendChild(el("pre","",r[3]));
+ a.appendChild(el("div","lbl","Проверь себя: "+r[4]));
+ const g=el("div","guess"),i=el("input");i.placeholder="Твой ответ";i.setAttribute("aria-label","Твой ответ");
+ const ok=el("button","act","Проверить"),sh=el("button","act","Показать ответ"),res=el("p","res");
+ res.setAttribute("aria-live","polite");
+ const show=(good)=>{res.className="res "+(good?"ok":"no");res.textContent=(good?"Верно. ":"Не совпало. Правильный ответ: ")+r[5];n.hidden=false};
+ const n=el("p","note","Частая ошибка: "+r[6]);n.hidden=true;
+ ok.onclick=()=>{if(!i.value.trim()){res.className="res no";res.textContent="Сначала введи свой вариант.";return}show(norm(i.value)===norm(r[5]))};
+ i.onkeydown=e=>{if(e.key==="Enter")ok.onclick()};
+ sh.onclick=()=>{res.className="res";res.textContent="Ответ: "+r[5];n.hidden=false};
+ g.append(i,ok,sh);a.append(g,res,n);return a}
+function render(){
+ chips.textContent="";chip("all","Все");for(const k in C)chip(k,C[k]);
+ const t=q.value.trim().toLowerCase();
+ const rows=D.filter(r=>(cat==="all"||r[0]===cat)&&(!t||(r[1]+r[2]+r[3]+r[6]).toLowerCase().includes(t)));
+ list.textContent="";cnt.textContent="Найдено: "+rows.length+" из "+D.length;
+ if(!rows.length)list.appendChild(el("div","empty","Ничего не найдено. Измени запрос или выбери «Все»."));
+ rows.forEach(r=>list.appendChild(card(r)))}
+q.oninput=render;render();
+</script>
+</body>
+</html>
